@@ -1,95 +1,49 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+import React, { useRef, useEffect, useState } from 'react';
+import styles from './page.module.css';
+import MatrixRainClass from './matrixRain';
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+const MatrixRain: React.FC = () => {
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+	const [speed, setSpeed] = useState<number>(40);
+	const matrixRainRef = useRef<MatrixRainClass | null>(null);
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+		matrixRainRef.current = new MatrixRainClass(canvas, speed);
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+		return () => {
+			if (matrixRainRef.current) {
+				matrixRainRef.current.destroy();
+			}
+		};
+	}, []);
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
-}
+	useEffect(() => {
+		if (matrixRainRef.current) {
+			matrixRainRef.current.updateSpeed(speed);
+		}
+	}, [speed]);
+
+	return (
+		<main className={styles.main}>
+			<canvas ref={canvasRef} />
+			<div className={styles.controls}>
+				<label htmlFor='speed'>Speed: {Math.max(0, Math.round(1000 / speed))} fps</label>
+				<input
+					id='speed'
+					type='range'
+					min='10'
+					max='100'
+					value={speed}
+					onChange={(e) => setSpeed(Number(e.target.value))}
+				/>
+			</div>
+		</main>
+	);
+};
+
+export default MatrixRain;
